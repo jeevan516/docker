@@ -11,8 +11,11 @@ from service.database import Base, engine, get_db
 
 app = FastAPI(title="User Directory API", version="1.0.0")
 
+# Create any missing tables at startup. Existing tables are left unchanged,
+# so this is not a substitute for migrations when a model changes.
 Base.metadata.create_all(bind=engine)
 
+# Route parameters typed with this alias receive one session per request.
 DatabaseSession = Annotated[Session, Depends(get_db)]
 
 
@@ -37,10 +40,14 @@ def ensure_email_available(
 
 def commit_user_change(db: Session) -> None:
     """Handle email conflicts that occur after the availability check."""
+    # Two requests can both pass ensure_email_available before either commits;
+    # the database unique index is the final guard against that race.
     try:
         db.commit()
     except IntegrityError as exc:
         db.rollback()
+        # Covers the index name SQLAlchemy creates and PostgreSQL's default
+        # unique-constraint name. Any other integrity error is re-raised.
         if isinstance(exc.orig, UniqueViolation) and exc.orig.diag.constraint_name in {
             "ix_users_email",
             "users_email_key",
@@ -79,6 +86,7 @@ def create_user(request: schemas.UserCreate, db: DatabaseSession) -> models.User
     new_user = models.User(name=request.name, email=email)
     db.add(new_user)
     commit_user_change(db)
+    # Reload the row to pick up the database-generated id.
     db.refresh(new_user)
     return new_user
 
@@ -91,6 +99,7 @@ def update_user(
     existing_user = get_user_or_404(db, user_id)
 
     email = str(request.email)
+    # Excluding this user allows an update that keeps the same email.
     ensure_email_available(db, email, exclude_user_id=user_id)
 
     existing_user.name = request.name
@@ -107,4 +116,5 @@ def delete_user(user_id: int, db: DatabaseSession) -> Response:
 
     db.delete(user)
     db.commit()
+    # Return an empty Response so FastAPI does not add a JSON body to the 204.
     return Response(status_code=status.HTTP_204_NO_CONTENT)
