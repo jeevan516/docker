@@ -1,0 +1,6 @@
+# The image needs only locked dependency metadata and the service package.
+**
+!pyproject.toml
+!uv.lock
+!service/
+!service/*.py
