@@ -45,6 +45,24 @@ Installing `psql` locally is optional. The Docker lesson includes a `docker exec
 > [!NOTE]
 > Text in angle brackets such as `<repo-name>` is a placeholder. Replace the complete placeholder, including the brackets, with your own value.
 
+> [!TIP]
+> The commands are written for bash (macOS, Linux, Git Bash, WSL). In Windows PowerShell:
+>
+> - End continued lines with a backtick `` ` `` instead of `\`. With `\`, each line runs as a separate command, so `docker run` receives `\` instead of the image name.
+> - In `docker run`, the image name comes after the options and before any command. An error such as `pull access denied for uvicorn` means a command word was read as the image name.
+> - Use `curl.exe` instead of `curl`, which is an alias for `Invoke-WebRequest` in Windows PowerShell 5.1.
+> - Use `2>$null` instead of `2>/dev/null`, and `Copy-Item .env.example .env` instead of `cp`.
+>
+> For example:
+>
+> ```powershell
+> docker run -d --name fastapi_cont `
+>     --network api-network `
+>     -e DB_CONN='postgresql+psycopg://postgres:postgres@postgres_cont:5432/fastapi_db' `
+>     -p 8000:8000 `
+>     user-directory-api
+> ```
+
 ### 1. Create the Repository from the Template
 
 Click **Use this template** on GitHub. Choose yourself as the owner, give the repository a name, and disable **Include all branches**.
