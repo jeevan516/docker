@@ -1,6 +1,6 @@
 # APIs, PostgreSQL and Docker: project notes
 
-_Last updated: 15 Nov 2026_
+_Last updated: 16 Nov 2026_
 
 ## Project
 **APIs, PostgreSQL and Docker.** Build a small user-directory web service step by step:
@@ -49,3 +49,4 @@ run the whole stack with Docker Compose.
 - 29 Oct 2026: notebook switched to the project kernel; PowerShell tips added to the README.
 - 30 Oct 2026: small updates to `.env.example` and VS Code settings.
 - 15 Nov 2026: project notes created.
+- 16 Nov 2026: presentation deck added: presentation/apis-postgres-docker.pptx (9 slides).
