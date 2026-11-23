@@ -1,0 +1,42 @@
+# Portainer stack "docker_learn": the user-directory FastAPI app (user_api) and its PostgreSQL.
+# Portainer cannot build images, so build the image once in a terminal first:
+#   cd C:\Projects\docker ; docker build -f service/Dockerfile -t user-directory-api .
+# Then: Portainer -> Stacks -> Add stack -> Name: docker_learn -> Upload this file
+#   -> Environment variables: POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+#      (or "Load variables from .env file": C:\Projects\docker\.env) -> Deploy the stack
+# The stack name must be docker_learn, so it reuses the data volume docker_learn_pg_data.
+# Both ports listen on this computer only.
+
+services:
+  postgres_cont:
+    image: postgres:17
+    container_name: postgres_cont
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  user_api:
+    image: user-directory-api
+    container_name: user_api
+    environment:
+      DB_CONN: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_cont:5432/${POSTGRES_DB}
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres_cont:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pg_data:
