@@ -1,0 +1,2 @@
+# Per-project settings for warden.py.
+test_cmd: uv run pytest -q
