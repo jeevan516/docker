@@ -14,9 +14,15 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "ipykernel>=7.3.0",
+    "pytest>=9.2.0",
     "requests>=2.34.2",
 ]
 
 [tool.ty.environment]
 root = [".", "./service"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

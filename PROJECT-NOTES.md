@@ -1,6 +1,6 @@
 # APIs, PostgreSQL and Docker: project notes
 
-_Last updated: 16 Nov 2026_
+_Last updated: 23 Nov 2026_
 
 ## Project
 **APIs, PostgreSQL and Docker.** Build a small user-directory web service step by step:
@@ -26,6 +26,11 @@ run the whole stack with Docker Compose.
    waits until Postgres is healthy, and has its own health check on `/`.
 6. **Extras:** documented the service code, added `scripts/seed_users.py` (default 50 users,
    seed 42, sent through `POST /users`), PowerShell tips in the README.
+7. **Tests:** pytest suite in `tests/` (`uv run pytest -q`): every CRUD endpoint through
+   FastAPI's TestClient on a throwaway SQLite database (201/200/204, 404, 409 duplicate email,
+   422 validation), the race-condition guard that turns a PostgreSQL unique violation into 409,
+   the seed script (deterministic users, rerun skips existing), Dockerfile/.dockerignore checks
+   and `docker compose config` (skipped when the docker CLI is missing; no containers started).
 
 ## Results
 | Check | Result |
@@ -34,11 +39,11 @@ run the whole stack with Docker Compose.
 | API example in the notebook | status **200**, **200** todos fetched; parsed objects match |
 | Practice exercise | **5** todos validated with Pydantic and saved to `data/validated_todos.json` |
 | CRUD API | 6 routes: health `/` plus 5 `/users` endpoints |
-| Automated tests | none in the repo |
+| Automated tests (23 Nov 2026) | **33 passed** (`uv run pytest -q`, under 1 s) |
 | Docker / Compose run | not recorded in the repo |
 
 ## Future engineering
-- Add pytest tests for the CRUD endpoints (for example with a SQLite test database).
+- Run the same tests against PostgreSQL (service container) to cover the real unique-index error path.
 - Use Alembic migrations instead of creating tables at startup.
 - Add a GitHub Actions workflow that builds the image and checks that the stack starts.
 - Add paging and search to `GET /users` for larger seeded data.
@@ -50,3 +55,4 @@ run the whole stack with Docker Compose.
 - 30 Oct 2026: small updates to `.env.example` and VS Code settings.
 - 15 Nov 2026: project notes created.
 - 16 Nov 2026: presentation deck added: presentation/apis-postgres-docker.pptx (9 slides).
+- 23 Nov 2026: pytest suite added (33 tests: CRUD API on SQLite, conflict handling, seed script, Docker/Compose config) and `.warden.yml` test_cmd.
