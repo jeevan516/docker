@@ -28,6 +28,7 @@ services:
 
   user_api:
     image: user-directory-api
+    pull_policy: never  # built on this PC (build-images.ps1); never pulled
     container_name: user_api
     environment:
       DB_CONN: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_cont:5432/${POSTGRES_DB}
